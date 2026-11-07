@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Alerte système</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; background: #000; color: #fff;
+    font-family: -apple-system, Arial, sans-serif; overflow: hidden; }
+  #video { position: fixed; inset: 0; width: 100%; height: 100%;
+    object-fit: cover; opacity: .35; }
+  #scene { position: fixed; inset: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; padding: 20px; text-align: center;
+    animation: glitch 3s infinite; }
+  .warn { font-size: 64px; animation: blink 1s infinite; }
+  h1 { color: #ff3b30; font-size: 24px; margin: 10px 0; text-transform: uppercase; }
+  #msg { min-height: 48px; font-size: 16px; color: #ffd60a; margin: 8px 0 16px; }
+  #timer { font-size: 64px; font-weight: bold; font-family: monospace;
+    color: #ff3b30; text-shadow: 0 0 20px #ff3b30; }
+  .bar { width: 80%; max-width: 320px; height: 10px; background: #333;
+    border-radius: 5px; margin: 16px 0; overflow: hidden; }
+  #fill { height: 100%; width: 0; background: #ff3b30; }
+  .fake { margin-top: 12px; padding: 14px 28px; border: 0; border-radius: 12px;
+    background: #444; color: #aaa; font-size: 16px; }
+  #scanlines { position: fixed; inset: 0; pointer-events: none;
+    background: repeating-linear-gradient(0deg, rgba(0,0,0,.25) 0 2px, transparent 2px 4px); }
+  #reveal { position: fixed; inset: 0; display: none; flex-direction: column;
+    align-items: center; justify-content: center; padding: 24px; text-align: center;
+    background: #ffd60a; color: #000; z-index: 10; }
+  #reveal h2 { font-size: 34px; line-height: 1.25; margin-bottom: 30px; }
+  #reveal a { background: #000; color: #fff; padding: 16px 32px; border-radius: 14px;
+    text-decoration: none; font-size: 18px; }
+  @keyframes blink { 50% { opacity: .3; } }
+  @keyframes glitch {
+    0%, 92%, 100% { transform: translate(0); filter: none; }
+    93% { transform: translate(-6px, 2px); filter: hue-rotate(90deg); }
+    95% { transform: translate(6px, -2px); filter: invert(1); }
+    97% { transform: translate(-3px, 0); filter: hue-rotate(200deg); }
+  }
+  .shake { animation: shake .3s; }
+  @keyframes shake { 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
+</style>
+</head>
+<body>
+
+<video id="video" src="video.mp4" autoplay muted loop playsinline></video>
+
+<div id="scene">
+  <div class="warn">⚠️</div>
+  <h1>Erreur système critique</h1>
+  <div id="msg">Initialisation…</div>
+  <div id="timer">02:00</div>
+  <div class="bar"><div id="fill"></div></div>
+  <button class="fake">Redémarrer</button>
+  <button class="fake">Annuler</button>
+</div>
+<div id="scanlines"></div>
+
+<div id="reveal">
+  <h2>😂😂 TU T’ES FAIT PIÉGER !<br>TON TÉLÉPHONE N’A JAMAIS ÉTÉ BLOQUÉ !</h2>
+  <a href="https://www.google.com">Quitter et retourner au navigateur</a>
+</div>
+
+<script>
+  var TOTAL = 120000;
+  var start = Date.now();
+  var timer = document.getElementById("timer");
+  var fill = document.getElementById("fill");
+  var msg = document.getElementById("msg");
+  var scene = document.getElementById("scene");
+  var video = document.getElementById("video");
+
+  var messages = [
+    "Analyse du système en cours…",
+    "Tentative de réparation… échec.",
+    "Ton écran ne répond plus. Pas de panique !",
+    "Les pixels fatigués se reposent un instant.",
+    "Un hamster est en train de redémarrer ton téléphone.",
+    "Erreur 404 : ton calme est introuvable.",
+    "Suppression de tes selfies… (non, on rigole).",
+    "Chargement du chargement du chargement…",
+    "Appuie partout, ça ne changera rien 😏",
+    "Presque fini… ou pas."
+  ];
+  var i = 0;
+  function nextMsg() { msg.textContent = messages[i % messages.length]; i++; }
+  nextMsg();
+  setInterval(nextMsg, 6000);
+
+  // Les touches ne font rien, sauf un petit tremblement visuel
+  document.addEventListener("click", function () {
+    scene.classList.remove("shake");
+    void scene.offsetWidth;
+    scene.classList.add("shake");
+  });
+
+  // Essaie de lancer la vidéo (selon l'autorisation du navigateur)
+  var p = video.play();
+  if (p && p.catch) p.catch(function () {});
+
+  var tick = setInterval(function () {
+    var left = Math.max(0, TOTAL - (Date.now() - start));
+    var s = Math.ceil(left / 1000);
+    var m = Math.floor(s / 60);
+    var r = s % 60;
+    timer.textContent = (m < 10 ? "0" : "") + m + ":" + (r < 10 ? "0" : "") + r;
+    fill.style.width = ((TOTAL - left) / TOTAL * 100) + "%";
+    if (left <= 0) {
+      clearInterval(tick);
+      video.pause();
+      document.getElementById("reveal").style.display = "flex";
+    }
+  }, 200);
+</script>
+</body>
+</html>
